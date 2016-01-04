@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
+
+float max(float *data, int size) {
+    int j = 0;
+    float max = data[j];
+    for (j = 0; j < size; j++) {
+        if (data[j] > max) {
+            max = data[j];
+        }
+    }
+    return max;
+}
+
+float min(float *data, int size) {
+    int j = 0;
+    float min = data[j];
+    for (j = 0; j < size; j++) {
+        if (data[j] < min) {
+            min = data[j];
+        }
+    }
+    return min;
+}
+
+float sum (float x , float y){
+	float sum = 0.0;
+	sum = x + y;
+	return sum;
+}
+float diff(float x , float y){
+	float diff = 0.0;
+	diff = x - y;
+	return diff;
+}
+void *print_data(float *data, int size) {
+    int j = 0;
+    while (j < size) {
+        printf("Index:%d\tdata:%f\n", j, data[j]);
+        j++;
+    }
+}
+void *runner(void *argv){
+    FILE *file;
+    char *read_data = malloc(sizeof(char) *2048);
+    char *tokens;
+    const char *delimeter = " ";
+    float number;
+    float data[200]; // how do i know the size of unprocessed data //fix this
+    int size = 0;
+    file = fopen(argv , "r");
+    if(file == NULL){
+         fprintf(stderr, "Unable to read from file: %s\n", argv);
+    }
+    while(fgets(read_data , 2048 , file) != NULL){
+        tokens = strtok(read_data , delimeter);
+        while(tokens != NULL){
+             number = atof(tokens);
+	    // printf("Number:%f\n", number);	
+            data[size] = number;
+            size = size + 1;
+            tokens = strtok(NULL , delimeter); //get the next token
+        }
+    }
+    //print_data(data , size);
+    float maxi = max(data , size);
+    float mini = min(data , size);
+    float sum_t = sum(maxi , mini);
+    float diff_t = diff(maxi , mini);  	
+    printf("MAX: %f\tMIN:%f\tSUM:%f\tDIFF:%f\t\n", maxi , mini , sum_t , diff_t);
+    free(read_data);
+    pthread_exit(NULL);
+}
+int main(int argc, char** argv) {
+    pthread_t th[argc];
+    pthread_t tid[argc];
+    int x;
+    long thread;
+    char *data_args = malloc(sizeof(char)*50);
+   if (argc < 2) {
+        fprintf(stderr, "Usage <program name><arguments>\n");
+        exit(1);
+    }
+   for (thread = 1; thread < argc; thread++) {
+        printf("In main: creating thread all thread returned variables are local %ld\n", thread);
+        strncpy(data_args , argv[thread] , strlen(argv[thread]));
+        printf("Filename: %s\n" , data_args);
+        tid[argc] = pthread_self(); 
+        x = pthread_create(&th[thread], NULL, runner , (void *) data_args);
+        sleep(1); //delay for 1 second
+        printf("thread OK:%d\tthread id:%lu  and the address: %lu (0x%1x) \n", x , (unsigned long)tid ,(unsigned long)tid);
+    }
+    //thread 2 finish before 1 any reason????
+    for (thread = 1; thread < argc ; thread++) {
+        pthread_join(th[thread], NULL);
+    }
+    pthread_exit(NULL);
+    free(data_args);
+    return (EXIT_SUCCESS);
+}
