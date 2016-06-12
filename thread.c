@@ -85,12 +85,11 @@ void *runner(void *argv) {
         init++;
     }
     
-	data[i] = (struct results*)malloc(sizeof(struct results));
-	printf("I:%d\n" , i);
-	data[i]->file_nm =  malloc(sizeof(char) * strlen(argv));
-	strcpy(data[i]->file_nm , argv);
-    //data[i].file_nm = argv;
-	float sum = min + max;
+    data[i] = (struct results*)malloc(sizeof(struct results));
+    printf("I:%d\n" , i);
+    data[i]->file_nm =  malloc(sizeof(char) * strlen(argv));
+    strcpy(data[i]->file_nm , argv); 
+    float sum = min + max;
     float diff = min - max;
     data[i]->sum = sum;
     data[i]->diff = diff;
@@ -141,11 +140,6 @@ int main(int argc, char** argv) {
 	k++;
     }
     /*determining the overall minimum and maximum value by feeding the all current minimum and maximum through fucntion min and max */
-    int j = 0;
-   // while (j < i) {
-       // printf("Filename %s\tSUM=%f\tDIF=%f\tMIN=%f\tMAX=%f\n", argv[j+1], temp[j]->sum, temp[j]->diff, temp[j]->min, temp[j]->max);
-       // j++;
-   // }
     mini = min(all_data, counter);
     maxi = max(all_data, counter);
     printf("MINIMUM=%f\tMAXIMUM=%f\t\n", mini, maxi);
