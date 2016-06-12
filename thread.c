@@ -10,11 +10,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
+
 /*Make these global to have access to them in main*/
-#define SIZE 9999
+#define SIZE 1000000
 
 struct results {
-	char *file_nm;
+    char *file_nm;
     float sum;
     float diff;
     float min;
@@ -62,7 +64,7 @@ void *runner(void *argv) {
     if (file == NULL) {
         fprintf(stderr, "Unable to read from file: %s\n", argv);
     }
-	pthread_mutex_lock(&mutex); //lock data for thread specific , note max_data is global
+    pthread_mutex_lock(&mutex); //lock data for thread specific , note max_data is global
     int init = 0;
     while (scan = fscanf(file, "%f", &cur_max) != EOF) {
         if (scan == 0) {
@@ -113,8 +115,9 @@ int main(int argc, char** argv) {
     int thread_ret;
     long thread;
     char *data_args = malloc(sizeof (char)* 2048);
-	struct results **temp;
-    if (argc < 2) {
+    struct results **temp;
+    
+   if (argc < 2) {
         fprintf(stderr, "Usage <program name><arguments . . . . . . .>\n");
         exit(1);
     }
@@ -128,17 +131,20 @@ int main(int argc, char** argv) {
             break; //exit loop
         }
     }
-    for (thread = 1; thread < argc ; thread++) {
-        pthread_join(th[thread],(void**)&temp);
+    int k = 0;		
+    for (thread = 1 ; thread < argc ; thread++) {
+	//sleep(1); //i had to do this because the thread was not been safe even though lpthread is supposed to be safe.
+	pthread_join(th[thread],(void**)&temp); // joins thread way too fast , inconsistent data
+	sleep(1); //i had to do this because the thread was not been safe even though lpthread is supposed to be safe.
+	printf("Filename %s\tSUM=%f\tDIF=%f\tMIN=%f\tMAX=%f\n",argv[k+1], temp[k]->sum, temp[k]->diff, temp[k]->min, temp[k]->max);
+	k++;
     }
-	printf("%s\n" , temp[3]->file_nm);
     /*determining the overall minimum and maximum value by feeding the all current minimum and maximum through fucntion min and max */
     int j = 0;
-    while (j < i) {
-		printf("%p\n" , temp[j]);
-        printf("Filename %s\tSUM=%f\tDIF=%f\tMIN=%f\tMAX=%f\n", argv[j+1], temp[j]->sum, temp[j]->diff, temp[j]->min, temp[j]->max);
-        j++;
-    }
+   // while (j < i) {
+       // printf("Filename %s\tSUM=%f\tDIF=%f\tMIN=%f\tMAX=%f\n", argv[j+1], temp[j]->sum, temp[j]->diff, temp[j]->min, temp[j]->max);
+       // j++;
+   // }
     mini = min(all_data, counter);
     maxi = max(all_data, counter);
     printf("MINIMUM=%f\tMAXIMUM=%f\t\n", mini, maxi);
