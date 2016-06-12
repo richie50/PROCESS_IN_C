@@ -126,6 +126,7 @@ int main(int argc, char** argv) {
         strncpy(data_args, argv[thread ], strlen(argv[thread]));
         tid[argc] = pthread_self();
         thread_ret = pthread_create(&th[thread], &attr, runner, (void *) data_args); /* execute thread with runner function */
+	sleep(1); // better way is to use nanosleep function in c
         if (thread_ret < 0) {
             fprintf(stderr, "Thread with filename %s  %lu failed\n", data_args, (unsigned long) tid[thread]);
             break; //exit loop
@@ -135,7 +136,7 @@ int main(int argc, char** argv) {
     for (thread = 1 ; thread < argc ; thread++) {
 	//sleep(1); //i had to do this because the thread was not been safe even though lpthread is supposed to be safe.
 	pthread_join(th[thread],(void**)&temp); // joins thread way too fast , inconsistent data
-	sleep(1); //i had to do this because the thread was not been safe even though lpthread is supposed to be safe.
+	//sleep(1); //i had to do this because the thread was not been safe even though lpthread is supposed to be safe.
 	printf("Filename %s\tSUM=%f\tDIF=%f\tMIN=%f\tMAX=%f\n",argv[k+1], temp[k]->sum, temp[k]->diff, temp[k]->min, temp[k]->max);
 	k++;
     }
